@@ -5,11 +5,14 @@ use log::*;
 
 use crate::config::AccountConfig;
 use crate::error::Error as CError;
-use crate::functions::{post, prompt_not_present};
+use crate::functions::{post, prompt_not_present, prompt_password_not_present};
 use crate::traits::ConfigTriat;
 
 pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
-    warn!("Your account ID and token will be stored in ~/.config/account.yml");
+    warn!(
+        "Your account ID and token will be stored in {:?}",
+        AccountConfig::path()
+    );
     warn!("This means that anyone with permission to see that file will have access to your token, thus your account");
     warn!("If you do not wish that to happen, exit with Ctrl + C");
 
@@ -21,7 +24,7 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
         &mut map,
     );
     prompt_not_present("Email", "email", &mut map);
-    prompt_not_present("Password", "password", &mut map);
+    prompt_password_not_present("Password", "password", &mut map);
 
     let user = map.get("username").unwrap();
     if !user.contains(':') {
@@ -32,7 +35,7 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     let email = map.get("email").unwrap().to_string();
     let password = map.get("password").unwrap().to_string();
 
-    let url = format!("https://{}/api/services/v1/account/create", instance);
+    let url = format!("{}/api/services/v1/account/create", instance);
 
     let body = V1All3 {
         email,
@@ -40,7 +43,7 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
         password,
     };
 
-    let res: V1Response = post(&url, body)?;
+    let res: V1Response = post(&url, body, map.contains_key("http"))?;
 
     match res {
         V1Response::Error { kind } => {
@@ -59,7 +62,8 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
                 info!("You can still log in later using the account and password");
                 return Err(e);
             } else {
-                info!("Token and ID is saved, and you will stay logged in")
+                info!("Token and ID is saved, and you will stay logged in");
+                info!("A verification email has been sent, verify your email address to gain more permissions")
             }
         }
         _ => unreachable!(),

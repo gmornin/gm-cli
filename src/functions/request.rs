@@ -7,10 +7,15 @@ use serde::{de::DeserializeOwned, Serialize};
 pub fn post<R: DeserializeOwned, T: Serialize + Sized>(
     url: &str,
     body: T,
+    http: bool,
 ) -> Result<R, Box<dyn Error>> {
+    if http {
+        warn!("This request is sent using the insecure http protocol");
+    }
+
     info!("Sending request");
     let res = reqwest::blocking::Client::new()
-        .post(url)
+        .post(format!("{}://{url}", if http { "http" } else { "https" }))
         .header(
             USER_AGENT,
             &format!("gm-cli {}", env::var("CARGO_PKG_VERSION").unwrap()),

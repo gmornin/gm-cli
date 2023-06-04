@@ -3,7 +3,7 @@ use std::{
     env,
     error::Error,
     fs::{self, OpenOptions},
-    io::{Write, self},
+    io::{self, Write},
     path::PathBuf,
 };
 
@@ -68,6 +68,10 @@ where
         file.write_all(s.as_bytes())?;
 
         Ok(())
+    }
+
+    fn clear() -> Result<(), Box<dyn Error>> {
+        Self::default().save()
     }
 
     fn to_map(&self) -> HashMap<String, String> {

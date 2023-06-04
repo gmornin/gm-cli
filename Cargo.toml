@@ -14,3 +14,4 @@ serde = {version = "1", features = ["derive"]}
 serde_yaml = "0.9"
 simplelog = "0.12"
 log = "0.4"
+rpassword = "7.2"
