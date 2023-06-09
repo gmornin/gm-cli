@@ -12,21 +12,21 @@ use serde::{de::DeserializeOwned, Serialize};
 
 pub trait ConfigTriat
 where
-    Self: Serialize + DeserializeOwned + Default,
+    Self: Serialize + DeserializeOwned + Clone + Default,
 {
     const NAME: &'static str;
 
     fn path() -> PathBuf {
         dirs::config_dir()
             .unwrap()
-            .join(env::var("CARGO_PKG_NAME").unwrap())
+            .join(env!("CARGO_PKG_NAME"))
             .join(format!("{}.yml", Self::NAME))
     }
 
     fn load() -> Result<Self, Box<dyn Error>> {
         let path = Self::path();
 
-        trace!("Reading config file at {:?}", Self::path());
+        debug!("Reading config file at {:?}", Self::path());
 
         let config = if path.exists() {
             let s = match fs::read_to_string(&path) {
@@ -53,7 +53,7 @@ where
             Self::default()
         };
 
-        trace!("Saving config file after load to {:?}", Self::path());
+        debug!("Saving config file after load to {:?}", Self::path());
         config.save()?;
         Ok(config)
     }

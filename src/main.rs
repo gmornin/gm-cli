@@ -6,7 +6,12 @@ use std::{
     fs::{self, OpenOptions},
 };
 
-use gm_cli::{commands, config::AccountConfig, functions::args_parse, traits::ConfigTriat};
+use gm_cli::{
+    commands,
+    config::{AccountConfig, ApplicationsConfig},
+    functions::args_parse,
+    traits::ConfigTriat,
+};
 use simplelog::*;
 
 fn main() {
@@ -28,7 +33,7 @@ fn main() {
                 .open(
                     dirs::data_dir()
                         .unwrap()
-                        .join(env::var("CARGO_PKG_NAME").unwrap())
+                        .join(env!("CARGO_PKG_NAME"))
                         .join("latest.log"),
                 )
                 .unwrap(),
@@ -37,7 +42,7 @@ fn main() {
     .unwrap();
 
     let args = env::args().skip(1).collect::<Vec<_>>();
-    trace!("Running with args {}", args.join(" "));
+    debug!("Running with args {}", args.join(" "));
 
     if args.is_empty() {
         error!("No command found");
@@ -56,7 +61,7 @@ fn main() {
     let commands = commands::commands();
     match commands.get(args.first().unwrap().as_str()) {
         Some(command) => match command(args_map) {
-            Ok(msg) => trace!("Command finished with message `{msg}`"),
+            Ok(msg) => debug!("Command finished with message `{msg}`"),
             Err(e) => error!("Command exited with error `{e}`"),
         },
         None => error!("No such command"),
@@ -64,16 +69,18 @@ fn main() {
 }
 
 fn init() -> Result<(), Box<dyn Error>> {
-    let package = env::var("CARGO_PKG_NAME").unwrap();
+    let package = env!("CARGO_PKG_NAME");
 
-    fs::create_dir_all(dirs::config_dir().unwrap().join(&package))?;
-    fs::create_dir_all(dirs::data_dir().unwrap().join(&package))?;
+    fs::create_dir_all(dirs::config_dir().unwrap().join(package))?;
+    fs::create_dir_all(dirs::data_dir().unwrap().join(package))?;
+    fs::create_dir_all(dirs::cache_dir().unwrap().join(package).join("downloads"))?;
 
     Ok(())
 }
 
 fn config_init(map: &mut HashMap<String, String>) -> Result<(), Box<dyn Error>> {
     AccountConfig::load()?.extend_map(map);
+    ApplicationsConfig::load()?;
 
     Ok(())
 }

@@ -7,11 +7,15 @@ edition = "2021"
 
 [dependencies]
 # goodmorning-bindings = {path = "../goodmorning-bindings", features = ["services-v1", "req-ser", "res-de"], version = "*"}
-goodmorning-bindings = {git = "https://github.com/goodmorning-network/rust-bindings", rev = "faf8b58", features = ["services-v1", "req-ser", "res-de"], version = "*"}
-reqwest = {version = "0.11", features = ["blocking", "json"]}
+goodmorning-bindings = {git = "https://github.com/goodmorning-network/rust-bindings", rev = "63e5fb5", features = ["services-v1", "req-ser", "res-de"], version = "*"}
+reqwest = {version = "0.11", features = ["blocking", "json", "multipart"]}
 dirs = "5.0"
 serde = {version = "1", features = ["derive"]}
 serde_yaml = "0.9"
 simplelog = "0.12"
 log = "0.4"
 rpassword = "7.2"
+chrono = "0.4"
+singlyton = "4.1"
+serde_json = "1.0"
+execute = "0.2"

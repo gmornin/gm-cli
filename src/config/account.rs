@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::traits::ConfigTriat;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Clone, Default)]
 pub struct AccountConfig {
     pub id: String,
     pub instance: String,
