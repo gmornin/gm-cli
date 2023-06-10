@@ -6,7 +6,7 @@ use crate::traits::ConfigTriat;
 
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct AccountConfig {
-    pub id: String,
+    pub id: i64,
     pub instance: String,
     pub token: String,
 }
@@ -17,7 +17,7 @@ impl ConfigTriat for AccountConfig {
 
 impl AccountConfig {
     pub fn is_loggedin(&self) -> bool {
-        !(self.id.is_empty() || self.instance.is_empty() || self.token.is_empty())
+        !(self.id == 0 || self.instance.is_empty() || self.token.is_empty())
     }
 
     pub fn is_loggedin_map(map: &HashMap<String, String>) -> bool {

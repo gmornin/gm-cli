@@ -61,6 +61,7 @@ pub fn cat(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
         .unwrap()
         .join(env!("CARGO_PKG_NAME"))
         .join("downloads")
+        .join(map.get("id").unwrap())
         .join(&path[1..]);
     fs::create_dir_all(cache_path.parent().unwrap())?;
     let mut file = OpenOptions::new()

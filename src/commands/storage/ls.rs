@@ -50,9 +50,12 @@ pub fn ls(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
 
             println!("---");
             println!("{} items", content.len());
-            content
-                .iter()
-                .for_each(|item| println!("{}", diritem_tostring(item, longest_size, &PathBuf::from(path))));
+            content.iter().for_each(|item| {
+                println!(
+                    "{}",
+                    diritem_tostring(item, longest_size, &PathBuf::from(path))
+                )
+            });
             println!("---");
         }
         V1Response::Error { kind } => {

@@ -3,7 +3,7 @@ use std::io::Read;
 use std::path::PathBuf;
 use std::{collections::HashMap, error::Error};
 
-use goodmorning_bindings::services::v1::{V1Response, V1Error};
+use goodmorning_bindings::services::v1::{V1Error, V1Response};
 use log::*;
 use reqwest::blocking::multipart::{Form, Part};
 
@@ -40,13 +40,12 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
 
-    let form = Form::new()
-        .part(
-            "file",
-            Part::bytes(buffer)
-                .file_name("filename.ext")
-                .mime_str("application/octet-stream")?,
-        );
+    let form = Form::new().part(
+        "file",
+        Part::bytes(buffer)
+            .file_name("filename.ext")
+            .mime_str("application/octet-stream")?,
+    );
 
     let overwrite = map.contains_key("overwrite");
 
@@ -66,16 +65,22 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     );
 
     info!("Sending request and uploading file");
-    let res: V1Response = reqwest::blocking::Client::new().post(url).multipart(form).send()?.json()?;
+    let res: V1Response = reqwest::blocking::Client::new()
+        .post(url)
+        .multipart(form)
+        .send()?
+        .json()?;
 
     match res {
-        V1Response::FileItemCreated { path } if !overwrite => {
+        V1Response::FileItemCreated if !overwrite => {
             info!("File item successfully created at `{path}`");
         }
-        V1Response::Overwritten { path } if overwrite => {
+        V1Response::Overwritten if overwrite => {
             info!("File item updated at `{path}`");
         }
-        V1Response::Error { kind: V1Error::FileNotFound } if overwrite => {
+        V1Response::Error {
+            kind: V1Error::FileNotFound,
+        } if overwrite => {
             error!("File not found");
             info!("Perhaps this means the file path is not occupied, and you should not include the `--overwrite` flag");
             return Err(CError::StrErr("Upload failed").into());
@@ -83,7 +88,7 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
         V1Response::Error { kind } => {
             return Err(kind.into());
         }
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 
     Ok("Uploaded".to_string())

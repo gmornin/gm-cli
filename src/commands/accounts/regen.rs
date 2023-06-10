@@ -26,11 +26,11 @@ pub fn regen(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>>
     let instance = map.get("instance").unwrap();
     let url = format!("{}/api/services/v1/account/regeneratetoken", instance);
 
-    let id = map.get("id").unwrap().to_string();
+    let id = map.get("id").unwrap().parse::<i64>()?;
     let password = map.get("password").unwrap().to_string();
 
     let body = V1PasswordId {
-        identifier: id.clone(),
+        identifier: id.to_string(),
         identifier_type: goodmorning_bindings::services::v1::V1IdentifierType::Id,
         password,
     };

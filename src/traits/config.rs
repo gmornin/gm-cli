@@ -9,6 +9,7 @@ use std::{
 
 use log::*;
 use serde::{de::DeserializeOwned, Serialize};
+use serde_yaml::Value;
 
 pub trait ConfigTriat
 where
@@ -75,7 +76,9 @@ where
     }
 
     fn to_map(&self) -> HashMap<String, String> {
-        serde_yaml::from_value(serde_yaml::to_value(self).unwrap()).unwrap()
+        let val: HashMap<String, Value> =
+            serde_yaml::from_value(serde_yaml::to_value(self).unwrap()).unwrap();
+        convert_hashmap_to_string(val)
     }
 
     fn extend_map(&self, map: &mut HashMap<String, String>) {
@@ -85,4 +88,21 @@ where
     fn delete_config() -> Result<(), io::Error> {
         fs::remove_file(Self::path())
     }
+}
+
+fn convert_value_to_string(value: &Value) -> String {
+    match value {
+        Value::Null => String::new(),
+        Value::Bool(b) => b.to_string(),
+        Value::Number(n) => n.to_string(),
+        Value::String(s) => s.to_owned(),
+        _ => unreachable!(),
+    }
+}
+
+fn convert_hashmap_to_string(hashmap: HashMap<String, Value>) -> HashMap<String, String> {
+    hashmap
+        .into_iter()
+        .map(|(k, v)| (k, convert_value_to_string(&v)))
+        .collect()
 }

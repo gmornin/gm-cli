@@ -52,6 +52,7 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
         }
         V1Response::Created { id, token } => {
             info!("Account has been created");
+            info!("Your user id is `{id}`");
             let account = AccountConfig {
                 id,
                 instance: instance.to_string(),

@@ -1,8 +1,29 @@
 cool cli for interacting with services.
 
-available commands: 
+## available commands
+
+Accounts
 - create
+- delete
 - login
 - logout
+- regen
+- rename
 
-figure how to use it urself, not that you would want to use it anyways
+Storage
+- cat
+- cp
+- ls
+- mkdir
+- rm
+- touch
+- upload
+- vis
+
+Utils
+- clean
+
+
+> For more info look at /src/commands yourself
+
+WIP, figure how to use it urself
