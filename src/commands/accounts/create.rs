@@ -5,10 +5,17 @@ use log::*;
 
 use crate::config::AccountConfig;
 use crate::error::Error as CError;
-use crate::functions::{post, prompt_not_present, prompt_password_not_present};
+use crate::functions::{map_args, post, prompt_not_present, prompt_password_not_present};
 use crate::traits::ConfigTriat;
 
-pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["username", "email", "password"];
+
+pub fn create(
+    mut map: HashMap<String, String>,
+    args: Vec<String>,
+) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
+
     warn!(
         "Your account ID and token will be stored in {:?}",
         AccountConfig::path()
@@ -35,7 +42,7 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     let email = map.get("email").unwrap().to_string();
     let password = map.get("password").unwrap().to_string();
 
-    let url = format!("{}/api/services/v1/account/create", instance);
+    let url = format!("{}/api/accounts/v1/create", instance);
 
     let body = V1All3 {
         email,
@@ -63,7 +70,7 @@ pub fn create(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
                 info!("You can still log in later using the account and password");
                 return Err(e);
             } else {
-                info!("Token and ID is saved, and you will stay logged in");
+                info!("Token and ID are saved, and you will stay logged in");
                 info!("A verification email has been sent, verify your email address to gain more permissions")
             }
         }

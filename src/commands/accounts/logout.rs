@@ -6,7 +6,7 @@ use crate::error::Error as CError;
 use crate::functions::yes;
 use crate::{config::AccountConfig, traits::ConfigTriat};
 
-pub fn logout(map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+pub fn logout(map: HashMap<String, String>, _args: Vec<String>) -> Result<String, Box<dyn Error>> {
     if !AccountConfig::is_loggedin_map(&map) {
         info!("You don't seemed to be logged in");
         return Ok(String::from("Nothing changed"));

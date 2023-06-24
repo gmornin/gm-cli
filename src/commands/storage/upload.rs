@@ -9,9 +9,15 @@ use reqwest::blocking::multipart::{Form, Part};
 
 use crate::config::AccountConfig;
 use crate::error::Error as CError;
-use crate::functions::prompt_not_present;
+use crate::functions::{map_args, prompt_not_present};
 
-pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["file", "path"];
+
+pub fn upload(
+    mut map: HashMap<String, String>,
+    args: Vec<String>,
+) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You must be logged in to view user files");
         return Err(CError::StrErr("not logged in").into());
@@ -23,12 +29,15 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     let instance = map.get("instance").unwrap();
     let token = map.get("token").unwrap();
     let file = PathBuf::from(map.get("file").unwrap());
-    let path = map.get("path").unwrap();
+    let prefix = PathBuf::from(map.get("prefix").unwrap_or(&String::new()));
+    let path = prefix.join(map.get("path").unwrap());
 
-    if !path.starts_with('/') {
+    if !path.has_root() {
         error!("User file paths must start with root `/`");
         return Err(CError::StrErr("invalid file path").into());
     }
+
+    let path = path.to_str().unwrap().to_string();
 
     if !file.exists() {
         error!("File to upload doesn't seem to exist");
@@ -50,7 +59,7 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     let overwrite = map.contains_key("overwrite");
 
     let url = format!(
-        "{}://{instance}/api/services/v1/storage/{}/{token}/{}",
+        "{}://{instance}/api/storage/v1/{}/{token}/{}",
         if map.contains_key("http") {
             "http"
         } else {
@@ -72,11 +81,8 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
         .json()?;
 
     match res {
-        V1Response::FileItemCreated if !overwrite => {
+        V1Response::FileItemCreated => {
             info!("File item successfully created at `{path}`");
-        }
-        V1Response::Overwritten if overwrite => {
-            info!("File item updated at `{path}`");
         }
         V1Response::Error {
             kind: V1Error::FileNotFound,
@@ -86,6 +92,10 @@ pub fn upload(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
             return Err(CError::StrErr("Upload failed").into());
         }
         V1Response::Error { kind } => {
+            if let V1Error::FileTypeMismatch { expected, got } = kind {
+                error!("Expected `{expected}`, got `{got}`");
+                return Err(CError::StrErr("Upload failed").into());
+            }
             return Err(kind.into());
         }
         _ => unreachable!(),

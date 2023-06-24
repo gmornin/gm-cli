@@ -34,8 +34,8 @@ pub fn diritem_tostring(item: &V1DirItem, max_size_len: usize, path: &Path) -> S
         .collect::<String>();
 
     format!(
-        "{file} {visibility}{inherited} {size_pad}{size} {year} {month} {day} {hour}:{min} {:?}",
-        path.join(&item.name),
+        "{file} {visibility}{inherited} {size_pad}{size} {year} {month} {day} {hour}:{min} {}",
+        path.join(&item.name).to_str().unwrap(),
     )
 }
 

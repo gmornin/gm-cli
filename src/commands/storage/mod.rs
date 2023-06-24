@@ -4,8 +4,10 @@ use crate::traits::types::CommandFnType;
 
 mod cat;
 mod cp;
+mod fs;
 mod ls;
 mod mkdir;
+mod mv;
 mod rm;
 mod touch;
 mod upload;
@@ -21,5 +23,7 @@ pub fn commands() -> HashMap<&'static str, CommandFnType> {
         ("rm", Box::new(rm::rm) as CommandFnType),
         ("touch", Box::new(touch::touch) as CommandFnType),
         ("vis", Box::new(vis::vis) as CommandFnType),
+        ("mv", Box::new(mv::mv) as CommandFnType),
+        ("fs", Box::new(fs::fs) as CommandFnType),
     ])
 }

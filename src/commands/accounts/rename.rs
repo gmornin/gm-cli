@@ -5,10 +5,16 @@ use goodmorning_bindings::services::v1::{V1RenameAccount, V1Response};
 use log::*;
 
 use crate::error::Error as CError;
-use crate::functions::{post, prompt_not_present};
+use crate::functions::{map_args, post, prompt_not_present};
 use crate::{config::AccountConfig, functions::yes};
 
-pub fn rename(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["newname"];
+
+pub fn rename(
+    mut map: HashMap<String, String>,
+    args: Vec<String>,
+) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You are not logged in");
         return Err(CError::StrErr("Not logged in").into());
@@ -20,7 +26,7 @@ pub fn rename(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>
     prompt_not_present("Your new username", "newname", &mut map);
 
     let instance = map.get("instance").unwrap();
-    let url = format!("{}/api/services/v1/account/rename", instance);
+    let url = format!("{}/api/accounts/v1/rename", instance);
 
     let new = map.get("newname").unwrap();
     let token = map.get("token").unwrap().to_string();

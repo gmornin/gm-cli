@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::error::Error;
+use std::path::PathBuf;
 use std::{env, fs};
 
 use std::fs::OpenOptions;
@@ -10,9 +11,12 @@ use log::*;
 
 use crate::config::{AccountConfig, APPLICATIONS};
 use crate::error::Error as CError;
-use crate::functions::prompt_not_present;
+use crate::functions::{map_args, prompt_not_present};
 
-pub fn cat(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["path"];
+
+pub fn cat(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You must be logged in to view user files");
         return Err(CError::StrErr("not logged in").into());
@@ -20,18 +24,21 @@ pub fn cat(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
 
     prompt_not_present("Path", "path", &mut map);
 
-    let path = map.get("path").unwrap();
+    let prefix = PathBuf::from(map.get("prefix").unwrap_or(&String::new()));
+    let path = prefix.join(map.get("path").unwrap());
 
-    if !path.starts_with('/') {
+    if !path.has_root() {
         error!("User file paths must start with root `/`");
         return Err(CError::StrErr("invalid file path").into());
     }
+
+    let path = path.to_str().unwrap().to_string();
 
     let instance = map.get("instance").unwrap();
     let token = map.get("token").unwrap();
 
     let url = format!(
-        "{}://{instance}/api/services/v1/storage/file/{token}/{}",
+        "{}://{instance}/api/storage/v1/file/{token}/{}",
         if map.contains_key("http") {
             "http"
         } else {

@@ -5,14 +5,20 @@ use goodmorning_bindings::services::v1::{V1PasswordId, V1Response};
 use log::*;
 
 use crate::error::Error as CError;
-use crate::functions::post;
+use crate::functions::{map_args, post};
 use crate::traits::ConfigTriat;
 use crate::{
     config::AccountConfig,
     functions::{prompt_password_not_present, yes},
 };
 
-pub fn regen(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["password"];
+
+pub fn regen(
+    mut map: HashMap<String, String>,
+    args: Vec<String>,
+) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You are not logged in");
         return Err(CError::StrErr("Not logged in").into());
@@ -24,7 +30,7 @@ pub fn regen(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>>
     prompt_password_not_present("Enter your password", "password", &mut map);
 
     let instance = map.get("instance").unwrap();
-    let url = format!("{}/api/services/v1/account/regeneratetoken", instance);
+    let url = format!("{}/api/accounts/v1/regeneratetoken", instance);
 
     let id = map.get("id").unwrap().parse::<i64>()?;
     let password = map.get("password").unwrap().to_string();

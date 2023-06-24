@@ -58,14 +58,7 @@ fn main() {
     };
     args_parse(&args, &mut args_map);
 
-    let commands = commands::commands();
-    match commands.get(args.first().unwrap().as_str()) {
-        Some(command) => match command(args_map) {
-            Ok(msg) => debug!("Command finished with message `{msg}`"),
-            Err(e) => error!("Command exited with error `{e}`"),
-        },
-        None => error!("No such command"),
-    }
+    commands::commands().run(args_map, args);
 }
 
 fn init() -> Result<(), Box<dyn Error>> {

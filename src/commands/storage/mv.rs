@@ -11,7 +11,7 @@ use crate::functions::{map_args, post, prompt_not_present};
 
 const ARGS: &[&str] = &["from", "to"];
 
-pub fn cp(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String, Box<dyn Error>> {
+pub fn mv(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String, Box<dyn Error>> {
     map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You are not logged in");
@@ -26,21 +26,33 @@ pub fn cp(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String,
         "{}/api/storage/v1/{}",
         instance,
         if map.contains_key("overwrite") {
-            "copy-overwrite"
+            "move-overwrite"
         } else {
-            "copy"
+            "move"
         }
     );
 
     let prefix = PathBuf::from(map.get("prefix").unwrap_or(&String::new()));
-    let from = prefix.join(map.get("from").unwrap());
+    let from = if map.get("user").is_none() {
+        prefix.join(map.get("from").unwrap())
+    } else {
+        PathBuf::from(map.get("from").unwrap())
+    };
     let to = prefix.join(map.get("to").unwrap());
+
+    if !from.has_root() {
+        error!("User file paths must start with root `/`");
+        return Err(CError::StrErr("invalid file path").into());
+    }
+
+    let from = from.to_str().unwrap().to_string();
+    let to = to.to_str().unwrap().to_string();
     let from_user = map.get("user").unwrap_or(map.get("id").unwrap());
     let token = map.get("token").unwrap().to_string();
 
     let body = V1FromTo {
-        from: from.to_str().unwrap().to_string(),
-        to: to.to_str().unwrap().to_string(),
+        from,
+        to: to.clone(),
         from_userid: from_user.parse()?,
         token,
     };
@@ -49,15 +61,15 @@ pub fn cp(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String,
 
     match res {
         V1Response::Error { kind } => {
-            error!("File not copied");
+            error!("File not moved");
             return Err(CError::StringErr(kind.to_string()).into());
         }
-        V1Response::Copied => {
-            info!("Item copied successfully");
-            info!("The copied path is `{}`", to.to_str().unwrap());
+        V1Response::Moved => {
+            info!("Item move successfully");
+            info!("The new path is `{to}`");
         }
         _ => unreachable!(),
     }
 
-    Ok(String::from("Copied"))
+    Ok(String::from("Moved"))
 }

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::error::Error;
+use std::path::PathBuf;
 
 use goodmorning_bindings::services::v1::{
     ItemVisibility, V1PathOnly, V1PathVisibility, V1Response,
@@ -8,9 +9,12 @@ use log::*;
 
 use crate::config::AccountConfig;
 use crate::error::Error as CError;
-use crate::functions::{post, prompt_not_present};
+use crate::functions::{map_args, post, prompt_not_present};
 
-pub fn vis(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["path", "vis"];
+
+pub fn vis(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You are not logged in");
         return Err(CError::StrErr("Not logged in").into());
@@ -25,7 +29,15 @@ pub fn vis(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
 
     let instance = map.get("instance").unwrap();
     let vis_str = map.get("vis").unwrap();
-    let path = map.get("path").unwrap().to_string();
+    let prefix = PathBuf::from(map.get("prefix").unwrap_or(&String::new()));
+    let path = prefix.join(map.get("path").unwrap());
+
+    if !path.has_root() {
+        error!("User file paths must start with root `/`");
+        return Err(CError::StrErr("invalid file path").into());
+    }
+
+    let path = path.to_str().unwrap().to_string();
     let token = map.get("token").unwrap().to_string();
 
     let vis = match vis_str.as_str() {
@@ -37,12 +49,9 @@ pub fn vis(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
     };
 
     let res = if vis_str.as_str() == "inherit" {
-        let url = format!("{}/api/services/v1/storage/remove-visibility", instance,);
+        let url = format!("{}/api/storage/v1/remove-visibility", instance,);
 
-        let body = V1PathOnly {
-            path,
-            token,
-        };
+        let body = V1PathOnly { path, token };
 
         post(&url, body, map.contains_key("http"))?
     } else {
@@ -52,13 +61,13 @@ pub fn vis(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
             token,
         };
 
-        let url = format!("{}/api/services/v1/storage/set-visibility", instance,);
+        let url = format!("{}/api/storage/v1/set-visibility", instance,);
         post(&url, body, map.contains_key("http"))?
     };
 
     match res {
         V1Response::Error { kind } => {
-            error!("File not copied");
+            error!("Visibility not changed");
             return Err(CError::StringErr(kind.to_string()).into());
         }
         V1Response::VisibilityChanged if vis_str.as_str() == "inherit" => {

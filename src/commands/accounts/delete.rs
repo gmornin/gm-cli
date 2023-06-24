@@ -6,10 +6,17 @@ use log::*;
 
 use crate::config::AccountConfig;
 use crate::error::Error as CError;
-use crate::functions::{post, type_yes};
+use crate::functions::{map_args, post, type_yes};
 use crate::traits::ConfigTriat;
 
-pub fn delete(map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &[];
+
+pub fn delete(
+    mut map: HashMap<String, String>,
+    args: Vec<String>,
+) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
+
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You are not logged in");
         return Err(CError::StrErr("Not logged in").into());
@@ -20,7 +27,7 @@ pub fn delete(map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
 
     let instance = map.get("instance").unwrap();
     let token = map.get("token").unwrap().to_string();
-    let url = format!("{}/api/services/v1/account/delete", instance);
+    let url = format!("{}/api/accounts/v1/delete", instance);
 
     let body = V1TokenOnly { token };
 

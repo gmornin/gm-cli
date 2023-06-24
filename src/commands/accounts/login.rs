@@ -5,10 +5,17 @@ use log::*;
 
 use crate::config::AccountConfig;
 use crate::error::Error as CError;
-use crate::functions::{post, prompt_not_present, prompt_password_not_present};
+use crate::functions::{map_args, post, prompt_not_present, prompt_password_not_present};
 use crate::traits::ConfigTriat;
 
-pub fn login(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>> {
+const ARGS: &[&str] = &["username", "password"];
+
+pub fn login(
+    mut map: HashMap<String, String>,
+    args: Vec<String>,
+) -> Result<String, Box<dyn Error>> {
+    map_args(&mut map, ARGS, args)?;
+
     warn!(
         "Your account ID and token will be stored in {:?}",
         AccountConfig::path()
@@ -33,7 +40,7 @@ pub fn login(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>>
     let (username, instance) = user.split_once(':').unwrap();
     let password = map.get("password").unwrap().to_string();
 
-    let url = format!("{}/api/services/v1/account/login", instance);
+    let url = format!("{}/api/accounts/v1/login", instance);
 
     let body = V1PasswordId {
         identifier: username.to_string(),
@@ -61,7 +68,7 @@ pub fn login(mut map: HashMap<String, String>) -> Result<String, Box<dyn Error>>
                 error!("However, saving to file failed, you will not stay logged in");
                 return Err(e);
             } else {
-                info!("Token and ID is saved, and you will stay logged in")
+                info!("Token and ID are saved, and you will stay logged in")
             }
         }
         _ => unreachable!(),
