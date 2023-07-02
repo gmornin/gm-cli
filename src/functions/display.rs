@@ -2,7 +2,8 @@ use std::error::Error;
 
 use chrono::{TimeZone, Utc};
 use goodmorning_bindings::structs::{
-    BirthDayDetail, CakeDayDetail, ProfileAccount, ProfileCustomisable, ProfileDetail,
+    BirthDayDetail, CakeDayDetail, ContactDetail, ProfileAccount, ProfileCustomisable,
+    ProfileDetail,
 };
 use log::*;
 
@@ -34,9 +35,12 @@ pub fn display_profile(
         &profile.description
     };
     let details = display_details(&profile.details);
+    let status = &account.status;
 
     format!(
         r#"{verified}{username} (joined {joined})
+
+Status: {status}
 
 Profile image: `{pfp}`
 
@@ -117,7 +121,7 @@ pub fn details_prompt(index: usize) -> Result<String, Box<dyn Error>> {
         return Err(CError::StrErr("invalid option").into());
     }
 
-    Ok(format!("Enter your {}", DETAILS_PROMPTS[index-1]))
+    Ok(format!("Enter your {}", DETAILS_PROMPTS[index - 1]))
 }
 
 pub fn details_to_string(detail: &ProfileDetail) -> String {
@@ -133,7 +137,7 @@ pub fn details_to_string(detail: &ProfileDetail) -> String {
         ProfileDetail::Company { value } => format!("company: {value}"),
         ProfileDetail::School { value } => format!("school: {value}"),
         ProfileDetail::EducationLevel { value } => format!("education level: {value}"),
-        ProfileDetail::Contact { .. } => todo!(),
+        ProfileDetail::Contact { value } => contacts_to_string(value),
     }
 }
 
@@ -178,4 +182,179 @@ pub fn details_from_string(index: usize, value: String) -> Result<ProfileDetail,
         7 => ProfileDetail::EducationLevel { value },
         _ => unreachable!(),
     })
+}
+
+const CONTACTS: [&str; 13] = [
+    "email",
+    "matrix",
+    "mastodon",
+    "lemmy",
+    "github",
+    "gitlab",
+    "bitbucket",
+    "reddit",
+    "discord",
+    "twitter",
+    "youtube",
+    "odysee",
+    "website",
+];
+const CONTACTS_PROMPTS: [&str; 13] = [
+    "email address (e.g. user@example.com)",
+    "matrix user id (e.g. user:example.com)",
+    "mastodon user id (e.g. user:example.com)",
+    "lemmy user id (e.g. user:example.com)",
+    "github username (e.g. user)",
+    "gitlab username (e.g. user)",
+    "bitbucket username (e.g. user)",
+    "reddit username (e.g. user)",
+    "discord username (e.g. user)",
+    "twitter username (e.g. user)",
+    "youtube username (e.g. user)",
+    "odysee username (e.g. user:1)",
+    "website (e.g. example.com without `https://`)",
+];
+
+pub fn contacts_list() -> String {
+    CONTACTS
+        .into_iter()
+        .enumerate()
+        .map(|(i, label)| format!("{}: {label}", i + 1))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+pub fn contacts_prompt(index: usize) -> Result<String, Box<dyn Error>> {
+    if index > 13 || index == 0 {
+        error!("{index} is not a valid option");
+        return Err(CError::StrErr("invalid option").into());
+    }
+    Ok(format!("Enter your {}", CONTACTS_PROMPTS[index - 1]))
+}
+
+pub fn contacts_to_string(contact: &ContactDetail) -> String {
+    let contact_type = match contact {
+        ContactDetail::Email { name, instance } => format!("email: {name}@{instance}"),
+        ContactDetail::Matrix { name, instance } => format!("matrix: {name}:{instance}"),
+        ContactDetail::Mastodon { name, instance } => format!("mastodon: {name}:{instance}"),
+        ContactDetail::Lemmy { name, instance } => format!("lemmy: {name}:{instance}"),
+        ContactDetail::Github { value } => format!("github: {value}"),
+        ContactDetail::Gitlab { value } => format!("gitlab: {value}"),
+        ContactDetail::Bitbucket { value } => format!("bitbucket: {value}"),
+        ContactDetail::Reddit { value } => format!("reddit: {value}"),
+        ContactDetail::Discord { value } => format!("discord: {value}"),
+        ContactDetail::Twitter { value } => format!("twitter: {value}"),
+        ContactDetail::Youtube { value } => format!("youtube: {value}"),
+        ContactDetail::Odysee {
+            name,
+            discriminator,
+        } => format!("odysee: {name}:{discriminator}"),
+        ContactDetail::Website { value } => format!("website: {value}"),
+    };
+
+    format!(
+        "{contact_type}{}",
+        contacts_to_url(contact)
+            .map(|url| format!(" ({url})"))
+            .unwrap_or_default()
+    )
+}
+
+pub fn contacts_from_string(index: usize, value: String) -> Result<ContactDetail, Box<dyn Error>> {
+    if index > 13 || index == 0 {
+        error!("{index} is not a valid option");
+        return Err(CError::StrErr("invalid option").into());
+    }
+
+    Ok(match index {
+        1 => {
+            let (name, instance) = match value.split_once('@') {
+                Some((name, instance)) => (name.to_string(), instance.to_string()),
+                None => {
+                    return Err(
+                        CError::StrErr("invalid format, expected `username@instance.com`").into(),
+                    )
+                }
+            };
+            ContactDetail::Email { name, instance }
+        }
+        2 => {
+            let (name, instance) = match value.split_once(':') {
+                Some((name, instance)) => (name.to_string(), instance.to_string()),
+                None => {
+                    return Err(
+                        CError::StrErr("invalid format, expected `username@instance.com`").into(),
+                    )
+                }
+            };
+            ContactDetail::Matrix { name, instance }
+        }
+        3 => {
+            let (name, instance) = match value.split_once(':') {
+                Some((name, instance)) => (name.to_string(), instance.to_string()),
+                None => {
+                    return Err(
+                        CError::StrErr("invalid format, expected `username@instance.com`").into(),
+                    )
+                }
+            };
+            ContactDetail::Mastodon { name, instance }
+        }
+        4 => {
+            let (name, instance) = match value.split_once(':') {
+                Some((name, instance)) => (name.to_string(), instance.to_string()),
+                None => {
+                    return Err(
+                        CError::StrErr("invalid format, expected `username@instance.com`").into(),
+                    )
+                }
+            };
+            ContactDetail::Lemmy { name, instance }
+        }
+        5 => ContactDetail::Github { value },
+        6 => ContactDetail::Gitlab { value },
+        7 => ContactDetail::Bitbucket { value },
+        8 => ContactDetail::Reddit { value },
+        9 => ContactDetail::Discord { value },
+        10 => ContactDetail::Twitter { value },
+        11 => ContactDetail::Youtube { value },
+        12 => {
+            let (name, discriminator) = match value.split_once(':') {
+                Some((name, instance)) => (name.to_string(), instance.parse()?),
+                None => {
+                    return Err(
+                        CError::StrErr("invalid format, expected `username@instance.com`").into(),
+                    )
+                }
+            };
+            ContactDetail::Odysee {
+                name,
+                discriminator,
+            }
+        }
+        13 => ContactDetail::Website { value },
+        _ => unreachable!(),
+    })
+}
+
+pub fn contacts_to_url(contact: &ContactDetail) -> Option<String> {
+    match contact {
+        ContactDetail::Email { .. } | ContactDetail::Discord { .. } => None,
+        ContactDetail::Matrix { name, instance } => {
+            Some(format!("https://matrix.to/#/{name}:{instance}"))
+        }
+        ContactDetail::Mastodon { name, instance } => Some(format!("https://{instance}/@{name}")),
+        ContactDetail::Lemmy { name, instance } => Some(format!("https://{instance}/u/{name}")),
+        ContactDetail::Github { value } => Some(format!("https://github.com/{value}")),
+        ContactDetail::Gitlab { value } => Some(format!("https://gitlab.com/{value}")),
+        ContactDetail::Bitbucket { value } => Some(format!("https://bitbucket.com/{value}")),
+        ContactDetail::Reddit { value } => Some(format!("https://reddit.com/u/{value}")),
+        ContactDetail::Twitter { value } => Some(format!("https://twitter.com/{value}")),
+        ContactDetail::Youtube { value } => Some(format!("https://youtube.com/@{value}")),
+        ContactDetail::Odysee {
+            name,
+            discriminator,
+        } => Some(format!("https://odysee.com/@{name}:{discriminator}")),
+        ContactDetail::Website { value } => Some(format!("https://{value}")),
+    }
 }

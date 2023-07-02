@@ -27,10 +27,12 @@ pub fn post<R: DeserializeOwned, T: Serialize + Sized>(
         }
     };
     debug!("Response recieved, deserializing");
-    match res.json() {
+    let text = res.text().unwrap_or_default();
+    match serde_json::from_str(&text) {
         Ok(out) => Ok(out),
         Err(e) => {
             error!("Deserialization failed");
+            info!("Server response: \n{}", text);
             Err(crate::error::Error::StringErr(e.to_string()).into())
         }
     }
@@ -54,10 +56,12 @@ pub fn get<R: DeserializeOwned>(url: &str, http: bool) -> Result<R, Box<dyn Erro
         }
     };
     debug!("Response recieved, deserializing");
-    match res.json() {
+    let text = res.text().unwrap_or_default();
+    match serde_json::from_str(&text) {
         Ok(out) => Ok(out),
         Err(e) => {
             error!("Deserialization failed");
+            info!("Server response: \n{}", text);
             Err(crate::error::Error::StringErr(e.to_string()).into())
         }
     }

@@ -22,7 +22,7 @@ pub fn fs(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String,
 
     prompt_not_present("Path", "path", &mut map);
 
-    let path = map.get("path").unwrap();
+    let path = map.remove("path").unwrap();
     let mut pathbuf = PathBuf::from(path);
 
     let mut commands = commands();
@@ -34,9 +34,9 @@ pub fn fs(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String,
             info!("Defaulting to `/`");
             pathbuf = PathBuf::from("/");
         }
-        let cmd = prompt_cmd();
+        let mut cmd = prompt_cmd();
         let mut map = map.clone();
-        args_parse(&cmd, &mut map);
+        args_parse(&mut cmd, &mut map);
 
         match cmd
             .iter()
@@ -51,8 +51,9 @@ pub fn fs(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String,
             [other, ..] if commands.contains_key(other) => {
                 let mut map = map.clone();
                 map.insert("prefix".to_string(), pathbuf.display().to_string());
-                args_parse(&cmd[1..], &mut map);
-                run_command(commands.get(other).unwrap()(map, cmd[1..].to_vec()));
+                let mut cmd = cmd[1..].to_vec();
+                args_parse(&mut cmd, &mut map);
+                run_command(commands.get(other).unwrap()(map, cmd));
             }
             _ => error!("Unknown command"),
         }

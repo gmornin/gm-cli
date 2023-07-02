@@ -41,7 +41,7 @@ fn main() {
     ])
     .unwrap();
 
-    let args = env::args().skip(1).collect::<Vec<_>>();
+    let mut args = env::args().skip(1).collect::<Vec<_>>();
     debug!("Running with args {}", args.join(" "));
 
     if args.is_empty() {
@@ -56,7 +56,7 @@ fn main() {
         info!("Try deleting the problematic config file to regenereate");
         return;
     };
-    args_parse(&args, &mut args_map);
+    args_parse(&mut args, &mut args_map);
 
     commands::commands().run(args_map, args);
 }

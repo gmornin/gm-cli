@@ -8,6 +8,7 @@ mod login;
 mod logout;
 mod regen;
 mod rename;
+mod status;
 
 pub fn commands() -> HashMap<&'static str, CommandFnType> {
     HashMap::from([
@@ -17,5 +18,6 @@ pub fn commands() -> HashMap<&'static str, CommandFnType> {
         ("regen", Box::new(regen::regen) as CommandFnType),
         ("rename", Box::new(rename::rename) as CommandFnType),
         ("delete", Box::new(delete::delete) as CommandFnType),
+        ("status", Box::new(status::status) as CommandFnType),
     ])
 }

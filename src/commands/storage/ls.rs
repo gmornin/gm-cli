@@ -17,7 +17,11 @@ pub fn ls(mut map: HashMap<String, String>, args: Vec<String>) -> Result<String,
         return Err(CError::StrErr("not logged in").into());
     }
 
-    prompt_not_present("Path", "path", &mut map);
+    if !map.contains_key("prefix") {
+        prompt_not_present("Path", "path", &mut map)
+    } else if !map.contains_key("path") {
+        let _ = map.insert("path".to_string(), String::new());
+    };
 
     let prefix = PathBuf::from(map.get("prefix").unwrap_or(&String::new()));
     let path = prefix.join(map.get("path").unwrap());

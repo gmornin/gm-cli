@@ -31,6 +31,7 @@ pub fn upload(
     let file = PathBuf::from(map.get("file").unwrap());
     let prefix = PathBuf::from(map.get("prefix").unwrap_or(&String::new()));
     let path = prefix.join(map.get("path").unwrap());
+    dbg!(&path);
 
     if !path.has_root() {
         error!("User file paths must start with root `/`");
