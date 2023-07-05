@@ -313,7 +313,6 @@ dependencies = [
 [[package]]
 name = "goodmorning-bindings"
 version = "0.1.0"
-source = "git+https://github.com/goodmorning-network/rust-bindings?rev=eaa9cee#eaa9cee623083e3194dec490f00e8da4a03d214c"
 dependencies = [
  "chrono",
  "serde",

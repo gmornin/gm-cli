@@ -49,7 +49,7 @@ pub fn set_profile(
         return Ok("Ran".to_string());
     }
 
-    let url = format!("{}/api/tex/generic/v1/profile-only/{id}", instance);
+    let url = format!("{}/api/tex/generic/v1/profile-only/id/{id}", instance);
 
     let res: V1Response = get(&url, map.contains_key("http"))?;
 
