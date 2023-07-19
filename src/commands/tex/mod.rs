@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use crate::traits::types::CommandFnType;
 
+mod compile;
 mod pfpedit;
 mod profile;
 mod set_profile;
-mod compile;
 
 pub fn commands() -> HashMap<&'static str, CommandFnType> {
     HashMap::from([
