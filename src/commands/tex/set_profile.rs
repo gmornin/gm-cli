@@ -8,16 +8,14 @@ use crate::config::AccountConfig;
 use crate::error::Error as CError;
 use crate::functions::{
     contacts_from_string, contacts_list, contacts_prompt, details_from_string, details_list,
-    details_prompt, display_profile_only, get, map_args, post, prompt, prompt_cmd, yes_msg,
+    details_prompt, display_profile_only, get, post, prompt, prompt_cmd, yes_msg,
 };
 
-const ARGS: &[&str] = &["username"];
-
 pub fn set_profile(
-    mut map: HashMap<String, String>,
-    args: Vec<String>,
+    map: HashMap<String, String>,
+    _args: Vec<String>,
 ) -> Result<String, Box<dyn Error>> {
-    map_args(&mut map, ARGS, args)?;
+    // map_args(&mut map, ARGS, args)?;
     if !AccountConfig::is_loggedin_map(&map) {
         error!("You are not logged in");
         return Err(CError::StrErr("Not logged in").into());
