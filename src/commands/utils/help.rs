@@ -30,8 +30,8 @@ const HELP: &str = "\x1b[32mGM CLI commands\x1b[0m
 \x1b[91mTEX:\x1b[0m
 \x1b[37m[executable] tex [subcommand..]\x1b[0m
     \x1b[33mcompile [path] [from] [to] (compiler)\x1b[0m    Compiles between formats
-    \x1b[33mpfpedit [file]\x1b[0m                           Changes your profile img
-    \x1b[33mpfedit\x1b[0m                                   A repl to change your profile
+    \x1b[33mpfpedit [file] (--reset)\x1b[0m                 Changes your profile img
+    \x1b[33mpfedit (--reset)\x1b[0m                         A repl to change your profile
     \x1b[33mprofile [username]\x1b[0m                       View user profile
 ";
 
