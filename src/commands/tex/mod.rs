@@ -6,6 +6,7 @@ mod compile;
 mod pfpedit;
 mod profile;
 mod publish;
+mod publishes;
 mod set_profile;
 
 pub fn commands() -> HashMap<&'static str, CommandFnType> {
@@ -18,5 +19,6 @@ pub fn commands() -> HashMap<&'static str, CommandFnType> {
         ("pfpedit", Box::new(pfpedit::pfpedit) as CommandFnType),
         ("compile", Box::new(compile::compile) as CommandFnType),
         ("publish", Box::new(publish::publish) as CommandFnType),
+        ("publishes", Box::new(publishes::publishes) as CommandFnType),
     ])
 }

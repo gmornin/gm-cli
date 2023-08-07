@@ -33,6 +33,8 @@ const HELP: &str = "\x1b[32mGM CLI commands\x1b[0m
     \x1b[33mpfpedit [file] (--reset)\x1b[0m                 Changes your profile img
     \x1b[33mpfedit (--reset)\x1b[0m                         A repl to change your profile
     \x1b[33mprofile [username]\x1b[0m                       View user profile
+    \x1b[33mpublish [path] [title] [desc]\x1b[0m            Publish a file
+    \x1b[33mpublishes [usernaem] [page] (per_page)\x1b[0m   View user published files
 ";
 
 pub fn help(_map: HashMap<String, String>, _args: Vec<String>) -> Result<String, Box<dyn Error>> {

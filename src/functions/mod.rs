@@ -6,6 +6,7 @@ mod path;
 mod prompt;
 mod request;
 mod yes;
+mod display_publish_item;
 
 pub use args_parse::args_parse;
 pub use diritem_tostring::*;
@@ -15,3 +16,4 @@ pub use path::*;
 pub use prompt::*;
 pub use request::*;
 pub use yes::*;
+pub use display_publish_item::*;

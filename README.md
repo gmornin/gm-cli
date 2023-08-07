@@ -65,6 +65,8 @@ compile [path] [from] [to] (compiler)    Compiles between formats
 pfpedit [file] (--reset)                 Changes your profile img
 pfedit (--reset)                         A repl to change your profile
 profile [username]                       View user profile
+publish [path] [title] [desc]            Publish a file
+publishes [usernaem] [page] (per_page)   View user published files
 ```
 
 #### Arguments
