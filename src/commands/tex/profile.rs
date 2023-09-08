@@ -28,7 +28,7 @@ pub fn profile(
     }
     let (username, instance) = username.split_once(':').unwrap();
 
-    let url = format!("{}/api/tex/generic/v1/profile/name/{username}", instance);
+    let url = format!("{}/api/generic/v1/profile/name/{username}", instance);
 
     let res: V1Response = get(&url, map.contains_key("http"))?;
 

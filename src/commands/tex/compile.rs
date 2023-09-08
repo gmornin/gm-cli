@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::path::PathBuf;
 use std::{collections::HashMap, error::Error};
 
@@ -5,7 +6,10 @@ use crate::config::AccountConfig;
 use crate::error::Error as CError;
 use crate::functions::{map_args, post, prompt_not_present};
 
-use goodmorning_bindings::services::v1::{Compiler, FromFormat, ToFormat, V1Compile, V1Response};
+use goodmorning_bindings::services::v1::{
+    Compiler, FromFormat, ToFormat, V1Compile, V1Error, V1Response,
+};
+use goodmorning_bindings::structs::TexCompileRes;
 use log::*;
 
 const ARGS: &[&str] = &["path", "from", "to", "compiler"];
@@ -35,7 +39,7 @@ pub fn compile(
     let instance = map.get("instance").unwrap();
     let token = map.get("token").unwrap().to_string();
 
-    let url = format!("{instance}/api/tex/compile/v1/simple");
+    let url = format!("{instance}/api/compile/v1/simple");
 
     let from = match map.get("from").unwrap().as_str() {
         "md" | "markdown" => FromFormat::Markdown,
@@ -76,13 +80,30 @@ pub fn compile(
     let res: V1Response = post(&url, body, map.contains_key("http"))?;
 
     match res {
-        V1Response::Compiled { id, newpath } => {
+        // V1Response::Compiled { id, newpath } => {
+        //     info!("Compile success");
+        //     info!("New path: {newpath}");
+        //     info!("Job ID: {id}");
+        // }
+        V1Response::Any { value } => {
+            let value: Box<dyn Any> = value;
+            let res = value.downcast_ref::<TexCompileRes>().unwrap();
+            info!("Compile success");
+            info!("New path: {}", res.newpath);
+            info!("Job ID: {}", res.id);
+        }
+        V1Response::TexCompiled { id, newpath } => {
             info!("Compile success");
             info!("New path: {newpath}");
             info!("Job ID: {id}");
         }
+        V1Response::Error {
+            kind: V1Error::CompileError { content },
+        } => {
+            error!("Error compiling:\n{content}");
+            return Err(CError::StrErr("Not compiled").into());
+        }
         V1Response::Error { kind } => {
-            error!("Unable to display file content");
             return Err(kind.into());
         }
         _ => unreachable!(),

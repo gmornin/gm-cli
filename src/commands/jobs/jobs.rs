@@ -1,6 +1,9 @@
+use std::any::Any;
 use std::{collections::HashMap, error::Error};
 
-use goodmorning_bindings::services::v1::{V1Job, V1Response, V1Task, V1TokenOnly};
+use goodmorning_bindings::services::v1::{V1Job, V1Response, V1TokenOnly};
+use goodmorning_bindings::structs::TexCompileDisplay;
+use goodmorning_bindings::traits::SerdeAny;
 use log::*;
 
 use crate::config::AccountConfig;
@@ -60,15 +63,21 @@ pub fn jobs(map: HashMap<String, String>, _args: Vec<String>) -> Result<String, 
 
 fn job_display(job: &V1Job) -> String {
     format!("{}: {}", job.id, task_display(&job.task))
+    // todo!()
 }
 
-fn task_display(task: &V1Task) -> String {
-    match task {
-        V1Task::Compile {
-            from,
-            to,
-            compiler,
-            path,
-        } => format!("compiling `{path}` from {from:?} to {to:?} with compiler {compiler:?}"),
+#[allow(clippy::borrowed_box)]
+fn task_display(task: &Box<dyn SerdeAny>) -> String {
+    let task_any: Box<dyn Any> = task.clone();
+    if let Ok(TexCompileDisplay {
+        from,
+        to,
+        compiler,
+        path,
+    }) = task_any.downcast::<TexCompileDisplay>().map(|v| *v)
+    {
+        return format!("compiling `{path}` from {from:?} to {to:?} with compiler {compiler:?}");
     }
+
+    serde_yaml::to_string(task).unwrap()
 }

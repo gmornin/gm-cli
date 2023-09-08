@@ -1,3 +1,4 @@
+#![feature(trait_upcasting)]
 pub mod commands;
 pub mod config;
 pub mod error;

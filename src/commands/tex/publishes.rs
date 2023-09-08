@@ -4,7 +4,7 @@ use goodmorning_bindings::services::v1::V1Response;
 use log::*;
 
 use crate::error::Error as CError;
-use crate::functions::{get, map_args, prompt_not_present, display_publish_item};
+use crate::functions::{display_publish_item, get, map_args, prompt_not_present};
 
 const ARGS: &[&str] = &["username", "page", "per_page"];
 
@@ -40,7 +40,7 @@ pub fn publishes(
     let (username, instance) = username.split_once(':').unwrap();
 
     let url = format!(
-        "{}/api/tex/publish/v1/publishes/name/{username}?page={page}&page_size={per_page}",
+        "{}/api/publish/v1/publishes/name/{username}?page={page}&page_size={per_page}",
         instance
     );
 
@@ -56,7 +56,14 @@ pub fn publishes(
             if items.is_empty() {
                 info!("Items empty")
             } else {
-                println!("{}", items.iter().map(display_publish_item).collect::<Vec<String>>().join("\n---\n"));
+                println!(
+                    "{}",
+                    items
+                        .iter()
+                        .map(display_publish_item)
+                        .collect::<Vec<String>>()
+                        .join("\n---\n")
+                );
             }
         }
         _ => unreachable!(),

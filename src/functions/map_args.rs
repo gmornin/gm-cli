@@ -9,7 +9,7 @@ pub fn map_args(
         return Err(crate::error::Error::StrErr("Too many arguments").into());
     }
 
-    keys.iter().zip(args.into_iter()).for_each(|(key, arg)| {
+    keys.iter().zip(args).for_each(|(key, arg)| {
         map.insert(key.to_string(), arg);
     });
 

@@ -25,10 +25,7 @@ pub fn display_profile(
         .unwrap()
         .format("%Y-%m-%d")
         .to_string();
-    let pfp = format!(
-        "https://{instance}/api/tex/generic/v1/pfp/id/{}",
-        account.id
-    );
+    let pfp = format!("https://{instance}/api/generic/v1/pfp/id/{}", account.id);
     let description = if profile.description.is_empty() {
         "\x1B[38;5;8m[empty string]\x1B[0m"
     } else {
@@ -54,7 +51,7 @@ Details
 }
 
 pub fn display_profile_only(profile: &ProfileCustomisable, id: i64, instance: &str) -> String {
-    let pfp = format!("https://{instance}/api/tex/generic/v1/pfp/id/{}", id);
+    let pfp = format!("https://{instance}/api/generic/v1/pfp/id/{}", id);
     let description = if profile.description.is_empty() {
         "\x1B[38;5;8m[empty string]\x1B[0m"
     } else {

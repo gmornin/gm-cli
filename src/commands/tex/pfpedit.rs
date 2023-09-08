@@ -28,7 +28,7 @@ pub fn pfpedit(
     let token = map.get("token").unwrap().to_string();
 
     if map.contains_key("reset") {
-        let url = format!("{}/api/tex/generic/v1/reset-pfp", instance);
+        let url = format!("{}/api/generic/v1/reset-pfp", instance);
         let body = V1TokenOnly { token };
 
         let res: V1Response = post(&url, body, map.contains_key("http"))?;
@@ -67,7 +67,7 @@ pub fn pfpedit(
     );
 
     let url = format!(
-        "{}://{}/api/tex/generic/v1/set-pfp/{token}",
+        "{}://{}/api/generic/v1/set-pfp/{token}",
         if map.contains_key("http") {
             "http"
         } else {

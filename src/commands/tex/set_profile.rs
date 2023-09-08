@@ -27,7 +27,7 @@ pub fn set_profile(
 
     if map.contains_key("reset") {
         yes_msg("Are you sure you want to reset your profile?", &map);
-        let url = format!("{}/api/tex/generic/v1/reset-profile", instance);
+        let url = format!("{}/api/generic/v1/reset-profile", instance);
         let body = V1TokenOnly {
             token: token.to_string(),
         };
@@ -47,7 +47,7 @@ pub fn set_profile(
         return Ok("Ran".to_string());
     }
 
-    let url = format!("{}/api/tex/generic/v1/profile-only/id/{id}", instance);
+    let url = format!("{}/api/generic/v1/profile-only/id/{id}", instance);
 
     let res: V1Response = get(&url, map.contains_key("http"))?;
 
@@ -137,7 +137,7 @@ pub fn set_profile(
                     profile: profile.clone(),
                     token: token.clone(),
                 };
-                let url = format!("{}/api/tex/generic/v1/set-profile", instance);
+                let url = format!("{}/api/generic/v1/set-profile", instance);
                 let res: V1Response = match post(&url, body, map.contains_key("http")) {
                     Ok(res) => res,
                     Err(e) => {

@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# goodmorning-bindings = {path = "../rust-bindings", features = ["services-v1", "req-ser", "res-de"], version = "*"}
-goodmorning-bindings = {git = "https://github.com/goodmorning-network/rust-bindings", rev = "51af874", features = ["services-v1", "req-ser", "res-de"], version = "*"}
+# goodmorning-bindings = {path = "../rust-bindings", version = "*"}
+goodmorning-bindings = {git = "https://github.com/goodmorning-network/rust-bindings", rev = "2978549"}
 reqwest = {version = "0.11", features = ["blocking", "json", "multipart"]}
 dirs = "5.0"
 serde = {version = "1", features = ["derive"]}

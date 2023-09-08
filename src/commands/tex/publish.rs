@@ -35,7 +35,7 @@ pub fn publish(
     let instance = map.get("instance").unwrap();
     let token = map.get("token").unwrap().to_string();
 
-    let url = format!("{instance}/api/tex/publish/v1/publish");
+    let url = format!("{instance}/api/publish/v1/publish");
     let body = V1Publish {
         token,
         path,
