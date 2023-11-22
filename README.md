@@ -1,3 +1,5 @@
+> Abandoned program, use [brewer](https://github.com/gmornin/brewer) instead.
+
 # GM CLI
 
 This is a simple CLI for interacting with the [GM services](https://github.com/gmornin/services) ([API docs](https://siriusmart.github.io/gm-services)).
